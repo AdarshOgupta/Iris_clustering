@@ -1,0 +1,100 @@
+#import
+
+import pandas as pd
+import numpy as np
+from sklearn.tree import DecisionTreeClassifier # Import Decision Tree Classifier
+from sklearn.model_selection import train_test_split # Import train_test_split function
+from sklearn import metrics #Import scikit-learn metrics module for accuracy calculation
+from sklearn.model_selection import train_test_split
+from sklearn import tree
+from sklearn.metrics import roc_auc_score
+from sklearn.tree import DecisionTreeClassifier,export_graphviz
+import os
+from sklearn.model_selection import GridSearchCV
+from matplotlib import pyplot as plt
+
+#Data_uploding 
+
+data  = pd.read_csv(r"C:\Users\Adarsh Gupta\Downloads\Iris.csv")
+data.head()
+
+#EDA
+data.info()
+
+data.dropna()
+
+df = data.reset_index()
+df = df.drop("index", axis="columns")
+df = df.drop("Id", axis="columns")
+df = df.drop("Species", axis="columns")
+df.head()
+
+
+df_new = pd.get_dummies(df)
+df_new.head()
+
+df_new = pd.get_dummies(df)
+df_new.head()
+
+df_kmeans = pd.get_dummies(df, drop_first=True)
+df_kmeans.head()
+
+#execution 
+
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+scaled_df_kmeans = scaler.fit_transform(df_kmeans)
+
+from sklearn.cluster import KMeans
+kmeans_model = KMeans(n_clusters=3)
+clusters = kmeans_model.fit_predict(df_kmeans)
+df_kmeans.insert(df_kmeans.columns.get_loc("SepalLengthCm"), "Cluster", clusters)
+df_kmeans.head(30)
+
+df_kmeans.Cluster.unique() 
+
+clusters
+
+ssd = []
+for k in range(2, 9):
+    kmeans_model = KMeans(n_clusters=k)
+    kmeans_model.fit(df_kmeans)
+    ssd.append(kmeans_model.inertia_)
+plt.figure(figsize=(6, 4), dpi=100)
+plt.plot(range(2, 9), ssd, color="green", marker="o")
+plt.xlabel("Number of clusters (K)")
+plt.ylabel("SSD for K")
+plt.show()
+
+from sklearn.cluster import KMeans
+kmeans_model = KMeans(n_clusters=3)
+clusters_1 = kmeans_model.fit_predict(df_kmeans)
+df_kmeans.insert(df_kmeans.columns.get_loc("SepalLengthCm"), "Cluster_1", clusters)
+df_kmeans.head(30)
+#sklearn.metric.silhouette_score(df_kmeans,clusters)
+
+from sklearn.metrics import silhouette_score
+range_n_clusters = [2, 3, 4, 5, 6, 7, 8,9]
+silhouette_avg = []
+for num_clusters in range_n_clusters:
+
+ # initialise kmeans
+ kmeans = KMeans(n_clusters=num_clusters)
+ kmeans.fit(df_kmeans)
+ cluster_labels = kmeans.labels_
+
+ # silhouette score
+ silhouette_avg.append(silhouette_score(df_kmeans, cluster_labels))
+plt.plot(range_n_clusters,silhouette_avg,'bx-')
+plt.xlabel('Values of K')
+plt.ylabel('Silhouette score')
+plt.title('Silhouette analysis For Optimal k')
+plt.show()
+
+print("The Silhouette Scores for different K values are as follows:")
+for k in range(2,10):
+  print(k,silhouette_avg[k-2])
+
+
+
+
